@@ -1,0 +1,69 @@
+
+use bd_vendas;
+--- ==========================================
+--- DML BÁSICO
+--- ==========================================
+
+-- 1. Insira um novo registro na tabela categoria
+INSERT INTO categoria (idcategoria, Descricao) 
+VALUES (1, 'Eletrônicos');
+
+-- 2. Insira um novo produto (Notebook) 
+-- Nota: Usei idcategoria 1 conforme o enunciado original, mas com o nome da sua coluna
+INSERT INTO produto (idproduto, nome, categoria_idcategoria, preco, QuantEstoque) 
+VALUES (1, 'Notebook', 1, 2500.00, 10);
+
+-- 3. Atualize o preço do produto com id 1 para 2700.00
+UPDATE produto 
+SET preco = 2700.00 
+WHERE idproduto = 1;
+
+-- 4. Liste o nome e preço de todos os produtos que estão na categoria com id 1
+SELECT nome, preco 
+FROM produto 
+WHERE categoria_idcategoria = 1;
+
+-- 5. Exclua o produto cujo id é 1
+DELETE FROM produto 
+WHERE idproduto = 1;
+
+-- 6. Insira dois novos tipos de clientes: 'Regular' e 'VIP'
+INSERT INTO tipo_cliente (descricao) 
+VALUES ('Regular'), ('VIP');
+
+-- 7. Liste o nome dos clientes e os tipos de clientes correspondentes
+SELECT c.nome, t.descricao 
+FROM cliente c
+JOIN tipo_cliente t ON c.id_tipo = t.id_tipo;
+
+-- 8. Atualize a quantidade em estoque de todos os produtos na categoria 1, adicionando 5 unidades
+UPDATE produto 
+SET QuantEstoque = QuantEstoque + 5 
+WHERE categoria_idcategoria = 1;
+
+
+--- ==========================================
+--- AGREGAÇÃO
+--- ==========================================
+
+-- 1. Qual é a quantidade total de produtos em estoque?
+SELECT SUM(QuantEstoque) AS total_estoque 
+FROM produto;
+
+-- 2. Qual é o preço médio dos produtos cadastrados?
+SELECT AVG(preco) AS preco_medio 
+FROM produto;
+
+-- 3. Quantos clientes estão cadastrados no banco de dados?
+SELECT COUNT(*) AS total_clientes 
+FROM cliente;
+
+-- 4. Qual é o produto mais caro no banco de dados?
+SELECT nome, preco 
+FROM produto 
+WHERE preco = (SELECT MAX(preco) FROM produto);
+
+-- 5. Qual é a média de quantidade de produtos por pedido?
+-- (Assumindo que a tabela de itens de pedido se chama item_pedido)
+SELECT AVG(quantidade) AS media_produtos_por_pedido 
+FROM item_pedido;
