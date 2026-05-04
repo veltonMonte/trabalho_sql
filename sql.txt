@@ -67,3 +67,52 @@ WHERE preco = (SELECT MAX(preco) FROM produto);
 -- (Assumindo que a tabela de itens de pedido se chama item_pedido)
 SELECT AVG(quantidade) AS media_produtos_por_pedido 
 FROM item_pedido;
+
+--- ==========================================
+--- JUNÇÃO
+--- ==========================================
+
+-- 1
+SELECT c.nome, s.descricao
+FROM pedido p
+JOIN cliente c ON p.id_cliente = c.idcliente
+JOIN status_pedido s ON p.id_status = s.id_status;
+
+-- 2
+SELECT p.nome, c.Descricao
+FROM produto p
+LEFT JOIN categoria c ON p.categoria_idcategoria = c.idcategoria;
+
+-- 3
+SELECT t.descricao, c.nome
+FROM tipo_cliente t
+LEFT JOIN cliente c ON c.id_tipo = t.id_tipo;
+
+-- 4
+SELECT c.nome, te.descricao
+FROM cliente c
+CROSS JOIN tipo_endereco te;
+
+-- 5
+SELECT c.nome, p.nome, ip.quantidade
+FROM pedido pe
+JOIN cliente c ON pe.id_cliente = c.idcliente
+JOIN item_pedido ip ON pe.idpedido = ip.id_pedido
+JOIN produto p ON ip.id_produto = p.idproduto;
+
+-- 6
+SELECT c.nome, e.*
+FROM cliente c
+LEFT JOIN endereco e ON c.idcliente = e.id_cliente AND e.padrao = 1;
+
+-- 7
+SELECT p.nome, COALESCE(SUM(ip.quantidade), 0) AS quantidade_vendida
+FROM produto p
+LEFT JOIN item_pedido ip ON p.idproduto = ip.id_produto
+GROUP BY p.nome;
+
+-- 8
+SELECT c.nome, pe.data_pedido, pe.valor_total
+FROM pedido pe
+JOIN cliente c ON pe.id_cliente = c.idcliente
+WHERE c.idcliente = 1;
