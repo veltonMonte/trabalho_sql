@@ -1,118 +1,303 @@
 
-use bd_vendas;
---- ==========================================
---- DML BÁSICO
---- ==========================================
+-- DML Básico
 
--- 1. Insira um novo registro na tabela categoria
-INSERT INTO categoria (idcategoria, Descricao) 
+-- Questão 1
+INSERT INTO categoria (idcategoria, Descricao)
 VALUES (1, 'Eletrônicos');
 
--- 2. Insira um novo produto (Notebook) 
--- Nota: Usei idcategoria 1 conforme o enunciado original, mas com o nome da sua coluna
-INSERT INTO produto (idproduto, nome, categoria_idcategoria, preco, QuantEstoque) 
-VALUES (1, 'Notebook', 1, 2500.00, 10);
+-- Questão 2
+INSERT INTO produto (
+    idproduto,
+    Nome,
+    Descricao,
+    Preco,
+    QuantEstoque,
+    categoria_idcategoria
+)
+VALUES (
+    1,
+    'Notebook',
+    'Notebook padrão',
+    2500.00,
+    10,
+    1
+);
 
--- 3. Atualize o preço do produto com id 1 para 2700.00
-UPDATE produto 
-SET preco = 2700.00 
+-- Questão 3
+UPDATE produto
+SET Preco = 2700.00
 WHERE idproduto = 1;
 
--- 4. Liste o nome e preço de todos os produtos que estão na categoria com id 1
-SELECT nome, preco 
-FROM produto 
+-- Questão 4
+SELECT Nome, Preco
+FROM produto
 WHERE categoria_idcategoria = 1;
 
--- 5. Exclua o produto cujo id é 1
-DELETE FROM produto 
+-- Questão 5
+DELETE FROM produto
 WHERE idproduto = 1;
 
--- 6. Insira dois novos tipos de clientes: 'Regular' e 'VIP'
-INSERT INTO tipo_cliente (descricao) 
-VALUES ('Regular'), ('VIP');
+-- Questão 6
+INSERT INTO tipocliente (idtipocliente, Descricao)
+VALUES
+(1, 'Regular'),
+(2, 'VIP');
 
--- 7. Liste o nome dos clientes e os tipos de clientes correspondentes
-SELECT c.nome, t.descricao 
+-- Questão 7
+SELECT c.Nome AS Cliente,
+       t.Descricao AS TipoCliente
 FROM cliente c
-JOIN tipo_cliente t ON c.id_tipo = t.id_tipo;
+INNER JOIN tipocliente t
+    ON c.tipocliente_idtipocliente = t.idtipocliente;
 
--- 8. Atualize a quantidade em estoque de todos os produtos na categoria 1, adicionando 5 unidades
-UPDATE produto 
-SET QuantEstoque = QuantEstoque + 5 
+-- Questão 8
+UPDATE produto
+SET QuantEstoque = QuantEstoque + 5
 WHERE categoria_idcategoria = 1;
 
+-- Agregação
 
---- ==========================================
---- AGREGAÇÃO
---- ==========================================
-
--- 1. Qual é a quantidade total de produtos em estoque?
-SELECT SUM(QuantEstoque) AS total_estoque 
+-- Questão 1
+SELECT SUM(QuantEstoque) AS TotalEstoque
 FROM produto;
 
--- 2. Qual é o preço médio dos produtos cadastrados?
-SELECT AVG(preco) AS preco_medio 
+-- Questão 2
+SELECT AVG(Preco) AS MediaPreco
 FROM produto;
 
--- 3. Quantos clientes estão cadastrados no banco de dados?
-SELECT COUNT(*) AS total_clientes 
+-- Questão 3
+SELECT COUNT(*) AS TotalClientes
 FROM cliente;
 
--- 4. Qual é o produto mais caro no banco de dados?
-SELECT nome, preco 
-FROM produto 
-WHERE preco = (SELECT MAX(preco) FROM produto);
+-- Questão 4
+SELECT Nome, Preco
+FROM produto
+WHERE Preco = (
+    SELECT MAX(Preco)
+    FROM produto
+);
 
--- 5. Qual é a média de quantidade de produtos por pedido?
--- (Assumindo que a tabela de itens de pedido se chama item_pedido)
-SELECT AVG(quantidade) AS media_produtos_por_pedido 
-FROM item_pedido;
+-- Questão 5
+SELECT AVG(Quantidade) AS MediaProdutosPorPedido
+FROM pedido_has_produto;
 
---- ==========================================
---- JUNÇÃO
---- ==========================================
+-- Junção
 
--- 1
-SELECT c.nome, s.descricao
+-- Questão 1
+SELECT c.Nome AS Cliente,
+       s.Descricao AS StatusPedido
 FROM pedido p
-JOIN cliente c ON p.id_cliente = c.idcliente
-JOIN status_pedido s ON p.id_status = s.id_status;
+INNER JOIN cliente c
+    ON p.cliente_idcliente = c.idcliente
+INNER JOIN status s
+    ON p.status_idstatus = s.idstatus;
 
--- 2
-SELECT p.nome, c.Descricao
+-- Questão 2
+SELECT p.Nome AS Produto,
+       c.Descricao AS Categoria
 FROM produto p
-LEFT JOIN categoria c ON p.categoria_idcategoria = c.idcategoria;
+LEFT JOIN categoria c
+    ON p.categoria_idcategoria = c.idcategoria;
 
--- 3
-SELECT t.descricao, c.nome
-FROM tipo_cliente t
-LEFT JOIN cliente c ON c.id_tipo = t.id_tipo;
+-- Questão 3
+SELECT t.Descricao AS TipoCliente,
+       c.Nome AS Cliente
+FROM tipocliente t
+LEFT JOIN cliente c
+    ON t.idtipocliente = c.tipocliente_idtipocliente;
 
--- 4
-SELECT c.nome, te.descricao
+-- Questão 4
+SELECT c.Nome AS Cliente,
+       t.Descricao AS TipoEndereco
 FROM cliente c
-CROSS JOIN tipo_endereco te;
+CROSS JOIN tipoendereco t;
 
--- 5
-SELECT c.nome, p.nome, ip.quantidade
-FROM pedido pe
-JOIN cliente c ON pe.id_cliente = c.idcliente
-JOIN item_pedido ip ON pe.idpedido = ip.id_pedido
-JOIN produto p ON ip.id_produto = p.idproduto;
+SELECT c.Nome AS Cliente,
+       p.Nome AS Produto,
+       php.Quantidade
+-- Questão 5
+FROM pedido ped
+INNER JOIN cliente c
+    ON ped.cliente_idcliente = c.idcliente
+INNER JOIN pedido_has_produto php
+    ON ped.idpedido = php.pedido_idpedido
+INNER JOIN produto p
+    ON php.produto_idproduto = p.idproduto;
 
--- 6
-SELECT c.nome, e.*
+-- Questão 6
+SELECT c.Nome AS Cliente,
+       e.Logradouro,
+       e.Numero,
+       e.Cidade
 FROM cliente c
-LEFT JOIN endereco e ON c.idcliente = e.id_cliente AND e.padrao = 1;
+LEFT JOIN endereco e
+    ON c.idcliente = e.cliente_idcliente
+   AND e.EnderecoPadrao = 1;
 
--- 7
-SELECT p.nome, COALESCE(SUM(ip.quantidade), 0) AS quantidade_vendida
+-- Questão 7
+SELECT p.Nome AS Produto,
+       COALESCE(SUM(php.Quantidade), 0) AS QuantidadeVendida
 FROM produto p
-LEFT JOIN item_pedido ip ON p.idproduto = ip.id_produto
-GROUP BY p.nome;
+LEFT JOIN pedido_has_produto php
+    ON p.idproduto = php.produto_idproduto
+GROUP BY p.idproduto, p.Nome;
 
--- 8
-SELECT c.nome, pe.data_pedido, pe.valor_total
-FROM pedido pe
-JOIN cliente c ON pe.id_cliente = c.idcliente
+-- Questão 8
+SELECT c.Nome AS Cliente,
+       p.Datapedido,
+       p.ValorTotalpedido
+FROM pedido p
+INNER JOIN cliente c
+    ON p.cliente_idcliente = c.idcliente
 WHERE c.idcliente = 1;
+
+-- Agregação e Junção
+
+-- Questão 1
+SELECT c.Descricao AS Categoria,
+       COUNT(p.idproduto) AS QuantidadeProdutos
+FROM categoria c
+LEFT JOIN produto p
+    ON c.idcategoria = p.categoria_idcategoria
+GROUP BY c.idcategoria, c.Descricao;
+
+-- Questão 2
+SELECT c.Descricao AS Categoria,
+       SUM(p.QuantEstoque) AS TotalEstoque
+FROM categoria c
+LEFT JOIN produto p
+    ON c.idcategoria = p.categoria_idcategoria
+GROUP BY c.idcategoria, c.Descricao;
+
+-- Questão 3
+SELECT s.Descricao AS StatusPedido,
+       COUNT(p.idpedido) AS QuantidadePedidos
+FROM status s
+LEFT JOIN pedido p
+    ON s.idstatus = p.status_idstatus
+GROUP BY s.idstatus, s.Descricao;
+
+-- Questão 4
+SELECT t.Descricao AS TipoCliente,
+       COUNT(c.idcliente) AS QuantidadeClientes
+FROM tipocliente t
+LEFT JOIN cliente c
+    ON t.idtipocliente = c.tipocliente_idtipocliente
+GROUP BY t.idtipocliente, t.Descricao;
+
+-- Subconsulta
+
+-- Questão 1
+SELECT Nome, Preco
+FROM produto
+WHERE Preco > (
+    SELECT AVG(Preco)
+    FROM produto
+);
+
+-- Questão 2
+SELECT Nome
+FROM cliente
+WHERE idcliente IN (
+    SELECT cliente_idcliente
+    FROM pedido
+);
+
+-- Questão 3
+SELECT p.idpedido,
+       pr.Nome AS Produto,
+       php.PrecoUnitario
+FROM pedido p
+INNER JOIN pedido_has_produto php
+    ON p.idpedido = php.pedido_idpedido
+INNER JOIN produto pr
+    ON php.produto_idproduto = pr.idproduto
+WHERE php.PrecoUnitario = (
+    SELECT MAX(php2.PrecoUnitario)
+    FROM pedido_has_produto php2
+    WHERE php2.pedido_idpedido = p.idpedido
+);
+
+-- Questão 4
+SELECT DISTINCT c.Nome
+FROM cliente c
+INNER JOIN pedido p
+    ON c.idcliente = p.cliente_idcliente
+WHERE p.ValorTotalpedido > (
+    SELECT AVG(ValorTotalpedido)
+    FROM pedido
+);
+
+-- Desafio
+
+-- Questão 1
+SELECT c.Nome,
+       SUM(p.ValorTotalpedido) AS TotalGasto
+FROM cliente c
+INNER JOIN pedido p
+    ON c.idcliente = p.cliente_idcliente
+GROUP BY c.idcliente, c.Nome
+ORDER BY TotalGasto DESC
+LIMIT 1;
+
+-- Questão 2
+SELECT c.Descricao AS Categoria,
+       p.Nome AS Produto,
+       SUM(php.Quantidade) AS TotalVendido
+FROM categoria c
+INNER JOIN produto p
+    ON c.idcategoria = p.categoria_idcategoria
+INNER JOIN pedido_has_produto php
+    ON p.idproduto = php.produto_idproduto
+GROUP BY c.Descricao, p.Nome
+HAVING SUM(php.Quantidade) = (
+    SELECT MAX(TotalQtd)
+    FROM (
+        SELECT SUM(php2.Quantidade) AS TotalQtd
+        FROM produto p2
+        INNER JOIN pedido_has_produto php2
+            ON p2.idproduto = php2.produto_idproduto
+        WHERE p2.categoria_idcategoria = c.idcategoria
+        GROUP BY p2.idproduto
+    ) AS sub
+);
+
+-- Questão 3
+SELECT c.Nome,
+       COUNT(p.idpedido) AS QuantidadePedidos,
+       SUM(p.ValorTotalpedido) AS TotalPedidos
+FROM cliente c
+INNER JOIN pedido p
+    ON c.idcliente = p.cliente_idcliente
+GROUP BY c.idcliente, c.Nome
+HAVING COUNT(p.idpedido) > 2
+   AND SUM(p.ValorTotalpedido) > 5000;
+
+-- Questão 4
+SELECT c.Descricao AS Categoria,
+       SUM(php.Quantidade * php.PrecoUnitario) AS TotalVendas
+FROM categoria c
+INNER JOIN produto p
+    ON c.idcategoria = p.categoria_idcategoria
+INNER JOIN pedido_has_produto php
+    ON p.idproduto = php.produto_idproduto
+GROUP BY c.idcategoria, c.Descricao
+ORDER BY TotalVendas DESC
+LIMIT 1;
+
+-- Questão 5
+SELECT t.Descricao AS TipoCliente,
+       AVG(PedidosPorCliente.TotalPedidos) AS MediaPedidos
+FROM (
+    SELECT c.idcliente,
+           c.tipocliente_idtipocliente,
+           COUNT(p.idpedido) AS TotalPedidos
+    FROM cliente c
+    LEFT JOIN pedido p
+        ON c.idcliente = p.cliente_idcliente
+    GROUP BY c.idcliente, c.tipocliente_idtipocliente
+) AS PedidosPorCliente
+INNER JOIN tipocliente t
+    ON PedidosPorCliente.tipocliente_idtipocliente = t.idtipocliente
+GROUP BY t.idtipocliente, t.Descricao;
+```
